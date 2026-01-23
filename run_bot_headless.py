@@ -1,10 +1,13 @@
+import matplotlib
+
+matplotlib.use('Agg')  # <--- THIS IS THE MAGIC LINE. It tells Python "Don't try to open a window"
+import seaborn as sns
 import streamlit as st
 import yfinance as yf
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
 import matplotlib.pyplot as plt
-import seaborn as sns
 from datetime import datetime
 
 # --- CONFIGURATION ---
