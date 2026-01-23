@@ -301,7 +301,35 @@ with st.expander("⚖️ LEGAL DISCLAIMER & RISK DISCLOSURE (READ CAREFULLY)"):
 
 # At the very end:
 from send_email import send_daily_alert
+import matplotlib.pyplot as plt
+import seaborn as sns
+import pandas as pd
 
+
+def save_importance_plot(model, feature_names):
+    """
+    Saves a bar chart of the top 5 features driving the model's decision.
+    """
+    # 1. Get numbers from the model
+    # (Note: This assumes you used RandomForest or XGBoost.
+    # If you used Logistic Regression, use 'coef_' instead of 'feature_importances_')
+    importances = model.feature_importances_
+
+    # 2. Sort them to find the winners
+    feature_imp = pd.DataFrame({'Value': importances, 'Feature': feature_names})
+    top_5 = feature_imp.sort_values(by="Value", ascending=False).head(5)
+
+    # 3. Draw the chart
+    plt.figure(figsize=(8, 4))
+    sns.barplot(x="Value", y="Feature", data=top_5, palette="viridis")
+    plt.title("Top 5 Factors Driving Today's Signal")
+    plt.xlabel("Influence Score")
+    plt.tight_layout()
+
+    # 4. Save it as a picture file
+    plt.savefig("reasoning_chart.png")
+    plt.close()
+    return "reasoning_chart.png"
 if __name__ == "__main__":
     # Get the latest signal from your logic
     latest_signal = "BUY"  # Replace with actual variable
@@ -310,3 +338,15 @@ if __name__ == "__main__":
 
     send_daily_alert(latest_signal, latest_conf, latest_price)
     print("Daily check complete. Email sent.")
+
+    # ... (Inside your main block, after training the model) ...
+
+    # 1. Generate the Chart
+    # 'model' is your trained AI variable
+    # 'X.columns' is the list of your indicator names (RSI, SMA, VIX, etc.)
+    plot_filename = save_importance_plot(model, X_train.columns)
+
+    # 2. Send Email with the Chart
+    from send_email import send_daily_alert
+
+    send_daily_alert(latest_signal, latest_conf, latest_price, plot_filename)
