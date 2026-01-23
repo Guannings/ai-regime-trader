@@ -34,7 +34,7 @@ def send_daily_alert(signal, confidence, price):
             Confidence: {confidence}%
             Price: ${price}
 
-            View chart: https://ai-regime-trader.streamlit.app
+            View chart: https://ai-regime-trader-zhethk7b4fmyjjsmt4fe2w.streamlit.app
             """
             msg.set_content(body)
 
