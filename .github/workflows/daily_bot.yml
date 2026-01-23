@@ -19,7 +19,7 @@ jobs:
 
       - name: Install libraries
         run: |
-          pip install pandas numpy yfinance scikit-learn streamlit
+          pip install pandas numpy yfinance scikit-learn streamlit matplotlib seaborn
 
       - name: Run AI and Send Email
         env:
