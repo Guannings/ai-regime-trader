@@ -296,3 +296,17 @@ with st.expander("⚖️ LEGAL DISCLAIMER & RISK DISCLOSURE (READ CAREFULLY)"):
     """)
 
     st.caption("Last Updated: January 2026")
+
+# ... (All your AI logic here) ...
+
+# At the very end:
+from send_email import send_daily_alert
+
+if __name__ == "__main__":
+    # Get the latest signal from your logic
+    latest_signal = "BUY"  # Replace with actual variable
+    latest_conf = 63.5  # Replace with actual variable
+    latest_price = 58.88  # Replace with actual variable
+
+    send_daily_alert(latest_signal, latest_conf, latest_price)
+    print("Daily check complete. Email sent.")
