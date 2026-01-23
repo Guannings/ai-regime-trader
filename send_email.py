@@ -5,9 +5,11 @@ import time
 from email.message import EmailMessage
 
 
-# Note: We added 'image_path' as a new argument here
 def send_daily_alert(signal, confidence, price, image_path=None):
-    SUBSCRIBERS = ["cheeperholy@gmail.com"]  # Add friends here
+    # 👇 STEP 1: Paste your actual Streamlit link here
+    DASHBOARD_LINK = "https://your-app-name.streamlit.app"
+
+    SUBSCRIBERS = ["your_email@gmail.com"]
     EMAIL_SENDER = os.environ.get('EMAIL_USER')
     EMAIL_PASSWORD = os.environ.get('EMAIL_PASS')
 
@@ -22,6 +24,7 @@ def send_daily_alert(signal, confidence, price, image_path=None):
             msg['To'] = email
             msg['Subject'] = f"📊 AI Trade Alert: {signal} SSO"
 
+            # 👇 STEP 2: Add the link to the message body
             body = f"""
             Hi! Here is today's market scan:
 
@@ -29,17 +32,17 @@ def send_daily_alert(signal, confidence, price, image_path=None):
             Confidence: {confidence}%
             Price: ${price}
 
+            📱 View Live Dashboard: {DASHBOARD_LINK}
+
             See the attached chart for the 'Why'.
             """
             msg.set_content(body)
 
-            # --- NEW CODE TO ATTACH IMAGE ---
             if image_path and os.path.exists(image_path):
                 with open(image_path, 'rb') as f:
                     img_data = f.read()
                     msg.add_attachment(img_data, maintype='image', subtype='png', filename='reasoning.png')
-            # -------------------------------
 
             smtp.send_message(msg)
-            print(f"Sent email with chart to {email}")
+            print(f"Sent email to {email}")
             time.sleep(1)
