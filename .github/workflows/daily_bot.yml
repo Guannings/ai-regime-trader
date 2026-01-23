@@ -1,0 +1,29 @@
+name: Daily AI Trading Bot
+
+on:
+  schedule:
+    # Runs at 13:00 UTC every day (which is 9:00 PM Taiwan Time)
+    - cron: '0 13 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Install libraries
+        run: |
+          pip install pandas numpy yfinance scikit-learn
+
+      - name: Run AI and Send Email
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+        run: |
+          python run_bot_headless.py
