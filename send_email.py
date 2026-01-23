@@ -9,7 +9,7 @@ def send_daily_alert(signal, confidence, price, image_path=None):
     # 👇 STEP 1: Paste your actual Streamlit link here
     DASHBOARD_LINK = "https://your-app-name.streamlit.app"
 
-    SUBSCRIBERS = ["your_email@gmail.com"]
+    SUBSCRIBERS = ["cheeperholy@gmail.com"]
     EMAIL_SENDER = os.environ.get('EMAIL_USER')
     EMAIL_PASSWORD = os.environ.get('EMAIL_PASS')
 
