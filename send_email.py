@@ -7,7 +7,7 @@ from email.message import EmailMessage
 
 def send_daily_alert(signal, confidence, price, image_path=None):
     # 👇 STEP 1: Paste your actual Streamlit link here
-    DASHBOARD_LINK = "https://your-app-name.streamlit.app"
+    DASHBOARD_LINK = "https://ai-regime-trader-dl-01-3-7-2-1.streamlit.app"
 
     SUBSCRIBERS = ["cheeperholy@gmail.com"]
     EMAIL_SENDER = os.environ.get('EMAIL_USER')
