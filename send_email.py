@@ -7,7 +7,7 @@ from email.message import EmailMessage
 
 # Note: We added 'image_path' as a new argument here
 def send_daily_alert(signal, confidence, price, image_path=None):
-    SUBSCRIBERS = ["your_email@gmail.com"]  # Add friends here
+    SUBSCRIBERS = ["cheeperholy@gmail.com"]  # Add friends here
     EMAIL_SENDER = os.environ.get('EMAIL_USER')
     EMAIL_PASSWORD = os.environ.get('EMAIL_PASS')
 
