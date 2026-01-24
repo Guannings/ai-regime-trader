@@ -22,16 +22,27 @@ RF_MIN_SAMPLES_LEAF = 5  # Matched to Email Bot
 TEST_SIZE = 0.2
 
 
-# --- 2. HELPER FUNCTIONS ---
-@st.cache_data(ttl=3600)  # Cache data for 1 hour to speed up app
+@st.cache_data(ttl=3600)
 def get_data(ticker):
-    """Downloads data with error handling"""
+    """Downloads data using the Ticker object (More stable for Streamlit Cloud)"""
     try:
-        data = yf.download(ticker, period="2y")
+        # 1. Use the Ticker object (It's polite to Yahoo)
+        stock = yf.Ticker(ticker)
+
+        # 2. Get history (This often bypasses the 'Empty Data' block)
+        data = stock.history(period="2y")
+
+        # 3. Check if it worked
         if data.empty:
-            st.error("Downloaded data is empty.")
+            st.error(f"⚠️ Yahoo Finance returned empty data for {ticker}. (Try refreshing the page in 1 minute).")
             return None
+
+        # 4. Clean the data (Timezone issues often break plots)
+        if data.index.tz is not None:
+            data.index = data.index.tz_localize(None)
+
         return data
+
     except Exception as e:
         st.error(f"Failed to download data: {e}")
         return None
