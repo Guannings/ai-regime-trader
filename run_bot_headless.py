@@ -146,7 +146,7 @@ if __name__ == "__main__":
         from send_email import send_daily_alert
 
         # IMPORTANT: Replace with your actual Streamlit URL
-        APP_LINK = "https://your-app-url.streamlit.app"
+        APP_LINK = "https://ai-regime-trader-dl-01-3-7-2-1.streamlit.app"
 
         send_daily_alert(
             signal=signal,
