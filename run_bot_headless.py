@@ -7,7 +7,6 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.utils.class_weight import compute_sample_weight
 import time
 import os
 
@@ -49,14 +48,13 @@ def save_importance_plot(model, feature_names):
     if hasattr(model, "feature_importances_"):
         importances = model.feature_importances_
         feature_imp = pd.DataFrame({'Value': importances, 'Feature': feature_names})
-        # Sort Highest to Lowest
         top_5 = feature_imp.sort_values(by="Value", ascending=False).head(5)
 
         plt.figure(figsize=(10, 4))
-        # Fixed palette warning and enforced order
+        # Fixed the 'palette' warning by adding hue and legend=False
         sns.barplot(x="Feature", y="Value", hue="Feature", data=top_5,
                     order=top_5['Feature'], palette="viridis", legend=False)
-        plt.title("Factors Driving Today's Signal (Highest to Lowest)")
+        plt.title("Factors Driving Today's Signal")
         plt.xlabel("Influence Score")
         plt.tight_layout()
 
@@ -104,12 +102,8 @@ if __name__ == "__main__":
     X_train = train[feature_cols]
     y_train = train['Target']
 
-    # 6. Train Model (CRITICAL: MATCHING WEBSITE WEIGHTS)
+    # 6. Train Model (MATCHING YOUR APP SETTINGS)
     print("🌲 Training Model...")
-
-    # Calculate Weights (This forces the model to respect Sell signals)
-    sample_weights = compute_sample_weight(class_weight='balanced', y=y_train)
-
     model = GradientBoostingClassifier(
         n_estimators=90,
         max_depth=3,
@@ -118,9 +112,7 @@ if __name__ == "__main__":
         min_samples_leaf=60,
         random_state=42
     )
-
-    # Train WITH weights
-    model.fit(X_train, y_train, sample_weight=sample_weights)
+    model.fit(X_train, y_train)
 
     # 7. Generate Signal
     latest_features = data_for_prediction[feature_cols].iloc[[-1]]
@@ -132,7 +124,7 @@ if __name__ == "__main__":
     latest_sma = data_for_prediction['SMA_200'].iloc[-1]
     is_bull_regime = latest_spy > latest_sma
 
-    # Decision Logic (Exact Match to App)
+    # Decision Logic (Matching App)
     signal = "NEUTRAL / HOLD"
 
     if latest_prob > 0.55 and is_bull_regime:
@@ -144,9 +136,7 @@ if __name__ == "__main__":
     else:
         signal = "NEUTRAL (Hysteresis)"
 
-    print(f"🔮 Prediction: {signal}")
-    print(f"📊 Confidence: {latest_prob * 100:.1f}%")
-    print(f"⚖️ Regime: {'Bullish' if is_bull_regime else 'Bearish'}")
+    print(f"🔮 Prediction: {signal} ({latest_prob * 100:.1f}%)")
 
     # 8. Generate Chart
     plot_filename = save_importance_plot(model, feature_cols)
@@ -155,8 +145,8 @@ if __name__ == "__main__":
     try:
         from send_email import send_daily_alert
 
-        # Replace with your actual Streamlit URL
-        APP_LINK = "https://ai-regime-trader-dl-01-3-7-2-1.streamlit.app/"
+        # IMPORTANT: Replace with your actual Streamlit URL
+        APP_LINK = "https://your-app-url.streamlit.app"
 
         send_daily_alert(
             signal=signal,
