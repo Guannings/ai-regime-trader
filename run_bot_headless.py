@@ -2,7 +2,7 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
-from sklearn.utils.class_weight import compute_sample_weight
+
 import matplotlib.pyplot as plt
 import seaborn as sns
 import smtplib
@@ -163,6 +163,7 @@ if __name__ == "__main__":
 
         # 5. Train Model (SNIPER SETTINGS - Matches your best result)
         # Using Sample Weights + Aggressive Depth for better Recall
+        from sklearn.utils.class_weight import compute_sample_weight
         sample_weights = compute_sample_weight(class_weight='balanced', y=y_train)
 
         model = GradientBoostingClassifier(
