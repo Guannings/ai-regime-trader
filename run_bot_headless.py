@@ -8,7 +8,6 @@ import pandas as pd
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
 import time
-import os
 
 # --- CONFIGURATION ---
 TRAIN_START = "2000-01-01"
