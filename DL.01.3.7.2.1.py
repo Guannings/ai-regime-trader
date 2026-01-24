@@ -20,7 +20,7 @@ st.set_page_config(page_title="AI Regime Detector", layout="wide")
 # Constants
 TRAIN_START = "2000-01-01"
 RISK_FREE_RATE = 0.04
-TRANSACTION_COST = 0.001  # 0.1% per trade
+TRANSACTION_COST = 0.00001  # 0.1% per trade
 
 
 # --- 1. ROBUST DATA LOADING ---
