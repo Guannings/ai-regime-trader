@@ -6,9 +6,9 @@
 
 **3. RISK OF LOSS AND LEVERAGE:** Trading in financial markets, particularly with the use of leveraged instruments (such as ProShares Ultra S&P500 - SSO), involves a high degree of risk and may not be suitable for all investors.
 
-Leverage Risk: This System utilizes 2x leveraged ETFs. While leverage can magnify gains, it also magnifies losses. A relatively small market movement can have a disproportionately large impact on the funds deposited. You may sustain a total loss of your initial invested capital and, in certain cases, typically involving margin, liable for amounts exceeding your initial deposit.
+* Leverage Risk: This System utilizes 2x leveraged ETFs. While leverage can magnify gains, it also magnifies losses. A relatively small market movement can have a disproportionately large impact on the funds deposited. You may sustain a total loss of your initial invested capital and, in certain cases, typically involving margin, liable for amounts exceeding your initial deposit.
 
-Volatility Decay: Leveraged ETFs are designed for short-term trading. Holding them for extended periods in volatile markets can result in significant value decay, even if the underlying index (S&P 500) remains flat.
+* Volatility Decay: Leveraged ETFs are designed for short-term trading. Holding them for extended periods in volatile markets can result in significant value decay, even if the underlying index (S&P 500) remains flat.
 
 **4. HYPOTHETICAL PERFORMANCE DISCLOSURE:** The results presented in this dashboard, including backtests and historical simulations, are hypothetical. Hypothetical or simulated performance results have certain inherent limitations. Unlike an actual performance record, simulated results do not represent actual trading. Also, since the trades have not actually been executed, the results may have under- or over-compensated for the impact, if any, of certain market factors, such as lack of liquidity. No representation is being made that any account will or is likely to achieve profits or losses similar to those shown. Past performance is not necessarily indicative of future results.
 
@@ -48,19 +48,19 @@ Solution: A Regime-Switching Model is required to identify "Safe" (Low Vol) vs. 
 
 The model inputs technical and volatility derivatives rather than raw price, normalizing data for machine learning:
 
-Market Fear: VIX Index (Normalized) & Rolling Volatility (20-Day).
+* Market Fear: VIX Index (Normalized) & Rolling Volatility (20-Day).
 
-Trend Extension: Distance from 200-Day SMA.
+* Trend Extension: Distance from 200-Day SMA.
 
-Momentum: RSI (Relative Strength Index) to detect overbought/oversold conditions.
+* Momentum: RSI (Relative Strength Index) to detect overbought/oversold conditions.
 
 **B. The AI Core (Gradient Boosting)**
 
 A Gradient Boosting Classifier was selected over Neural Networks (LSTM/Transformers) due to its robustness with tabular data and resistance to noise.
 
-Hyperparameters: Tuned for a "Sniper" approach (n_estimators=90, max_depth=3, learning_rate=0.025, ubsample=0.7, min_samples_leaf=60, and random_state=42).
+* Hyperparameters: Tuned for a "Sniper" approach (n_estimators=90, max_depth=3, learning_rate=0.025, ubsample=0.7, min_samples_leaf=60, and random_state=42).
 
-Class Balancing: Applied sample_weights = compute_sample_weight(class_weight='balanced', y=y_train) and model.fit(X_train, y_train, sample_weight=sample_weights) to penalize the model heavily for missing Sell signals, countering the dataset's inherent Bullish bias.
+* Class Balancing: Applied sample_weights = compute_sample_weight(class_weight='balanced', y=y_train) and model.fit(X_train, y_train, sample_weight=sample_weights) to penalize the model heavily for missing Sell signals, countering the dataset's inherent Bullish bias.
 
 **C. The "Safety Valve" (Regime Filter)**
 
@@ -83,13 +83,13 @@ D. Overfitting Mitigation & Robustness
 
 To prevent the model from memorizing historical noise ("looking back"), the following constraints were architected into the system:
 
-a. Walk-Forward Validation: Unlike standard random splitting, this project utilized Time Series Cross-Validation. The model was trained on past data and tested strictly on "future" unseen data, simulating real-world execution conditions.
+* Walk-Forward Validation: Unlike standard random splitting, this project utilized Time Series Cross-Validation. The model was trained on past data and tested strictly on "future" unseen data, simulating real-world execution conditions.
 
-b. Structural Constraints: The Gradient Boosting model was constrained with a shallow depth (max_depth=3) and a conservative learning rate (0.025). This forces the AI to learn broad, repeatable market concepts rather than memorizing niche price anomalies.
+* Structural Constraints: The Gradient Boosting model was constrained with a shallow depth (max_depth=3) and a conservative learning rate (0.025). This forces the AI to learn broad, repeatable market concepts rather than memorizing niche price anomalies.
 
-c. The "Hysteresis" Filter: To prevent "noise trading" (over-reacting to insignificant probability shifts), a deadband was implemented. The model ignores signals between 45% and 55% confidence, acting only when a decisive probability threshold is crossed.
+* The "Hysteresis" Filter: To prevent "noise trading" (over-reacting to insignificant probability shifts), a deadband was implemented. The model ignores signals between 45% and 55% confidence, acting only when a decisive probability threshold is crossed.
 
-d. Hard Logic Overrides: The Regime Filter (200-Day SMA) acts as a non-negotiable "Circuit Breaker." Even if the AI overfits and predicts a "Buy" during a structural crash, the hard logic forces a "Cash" position, ensuring the safety of capital takes precedence over model variance.
+* Hard Logic Overrides: The Regime Filter (200-Day SMA) acts as a non-negotiable "Circuit Breaker." Even if the AI overfits and predicts a "Buy" during a structural crash, the hard logic forces a "Cash" position, ensuring the safety of capital takes precedence over model variance.
 
 **5. Conclusion**
 The algorithm successfully acts as a "Market Regime Detector." It does not attempt to predict exact daily price movements (which is stochastic) but rather identifies the underlying state of the market. This approach allows for the responsible use of 2x leverage by neutralizing the primary risk factor: prolonged exposure to bear markets.
