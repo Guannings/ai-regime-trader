@@ -32,7 +32,7 @@ Date: January 2026
 Tech Stack: Python, Scikit-Learn (Gradient Boosting), Streamlit, yfinance
 
 **1. Executive Summary**
-This project implements a machine-learning-based trading strategy designed to capture the upside of leveraged equity ETFs (ProShares Ultra S&P500 - SSO) while mitigating the inherent risks of volatility decay and drawdowns during bear markets.
+This project implements a Machine Learning based trading strategy designed to capture the upside of leveraged equity ETFs (ProShares Ultra S&P500 - SSO) while mitigating the inherent risks of volatility decay and drawdowns during bear markets.
 
 The system utilizes a Gradient Boosting Classifier to predict short-term market regimes, reinforced by a Hard Logic Regime Filter (200-Day SMA) to override AI signals during structural market downturns. Backtesting on data from 2020–2026 demonstrates a significant risk-adjusted return advantage over a passive "Buy & Hold" strategy, specifically by minimizing max drawdowns during the 2020 and 2022 crashes.
 
