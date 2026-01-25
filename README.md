@@ -1,4 +1,4 @@
-**IMPORTANT LEGAL DISCLAIMER AND RISK DISCLOSURE**
+# **IMPORTANT LEGAL DISCLAIMER AND RISK DISCLOSURE**
 
 **1. GENERAL DISCLAIMER:** The content, signals, data, and software provided herein (collectively, the "System") are for informational, educational, and research purposes only. The Creator and associated contributors (the "Developers") are not registered financial advisors, broker-dealers, or investment professionals. Nothing in this System constitutes personalized investment advice, a recommendation to buy, sell, or hold any security, or a solicitation of any offer to buy or sell any financial instruments.
 
