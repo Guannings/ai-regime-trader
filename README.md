@@ -14,16 +14,16 @@ Volatility Decay: Leveraged ETFs are designed for short-term trading. Holding th
 
 **5. ALGORITHMIC AND TECHNICAL RISKS:** The System relies on artificial intelligence, machine learning models (specifically Gradient Boosting Classifiers), and third-party data feeds (Yahoo Finance).
 
-Model Failure: The AI model is trained on historical data and may fail to predict future market regimes, "Black Swan" events, or structural market changes.
+The AI model is trained on historical data and may fail to predict future market regimes, "Black Swan" events, or structural market changes.
 
-Data Integrity: The System relies on external API data which may be delayed, inaccurate, or unavailable. The Developers do not guarantee the accuracy, timeliness, or completeness of the data.
+The System relies on external API data which may be delayed, inaccurate, or unavailable. The Developers do not guarantee the accuracy, timeliness, or completeness of the data.
 
-Software Bugs: The code is provided "AS IS" without warranty of any kind. There may be errors, bugs, or glitches in the logic that could result in incorrect signals or financial loss.
+The code is provided "AS IS" without warranty of any kind. There may be errors, bugs, or glitches in the logic that could result in incorrect signals or financial loss.
 
 **6. LIMITATION OF LIABILITY:** IN NO EVENT SHALL THE DEVELOPERS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SYSTEM, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =============================================================================
-**Explanation of this project: Dynamic Regime-Switching Algorithm for Leveraged ETFs**
+# **Dynamic Regime-Switching Algorithm for Leveraged ETFs**
 
 Author: [PEHC] 
 
