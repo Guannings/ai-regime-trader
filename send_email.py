@@ -8,7 +8,7 @@ from email.message import EmailMessage
 def send_daily_alert(signal, confidence, price, image_path=None, app_link=""):
     # --- CONFIG ---
     # Add your friends' emails to this list if you want
-    SUBSCRIBERS = ["cheeperholy@gmail.com"]
+    SUBSCRIBERS = ["ellowoala@gmail.com"]
 
     EMAIL_SENDER = os.environ.get('EMAIL_USER')
     EMAIL_PASSWORD = os.environ.get('EMAIL_PASS')
