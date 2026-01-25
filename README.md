@@ -32,11 +32,13 @@ Date: January 2026
 Tech Stack: Python, Scikit-Learn (Gradient Boosting), Streamlit, yfinance
 
 **1. Executive Summary**
+
 This project implements a Machine Learning based trading strategy designed to capture the upside of leveraged equity ETFs (ProShares Ultra S&P500 - SSO) while mitigating the inherent risks of volatility decay and drawdowns during bear markets.
 
 The system utilizes a Gradient Boosting Classifier to predict short-term market regimes, reinforced by a Hard Logic Regime Filter (200-Day SMA) to override AI signals during structural market downturns. Backtesting on data from 2020–2026 demonstrates a significant risk-adjusted return advantage over a passive "Buy & Hold" strategy, specifically by minimizing max drawdowns during the 2020 and 2022 crashes.
 
 **2. Investment Thesis**
+
 Leveraged ETFs (LETFs) like SSO (2x S&P 500) offer amplified returns but suffer from Beta Decay (Volatility Drag). In choppy or declining markets, the daily rebalancing of LETFs causes the asset value to erode faster than the underlying index.
 
 Hypothesis: A "Blind Buy & Hold" strategy on SSO is mathematically flawed due to decay.
@@ -71,6 +73,7 @@ Rule 1 (Trend Filter): If SPY < 200-Day SMA, the system is forced to CASH, regar
 Rule 2 (Hysteresis): To minimize transaction costs (churn), the model requires a confidence buffer (>55% to Buy, <45% to Sell). Signals in the "Gray Zone" result in holding the current position.
 
 **4. Performance Validation**
+
 The strategy was validated using Walk-Forward Cross-Validation (Time Series Split) to prevent look-ahead bias.
 
 Metric 1: Defense (Recall on Sell Signals): Achieved a Recall of 34%. This indicates the model successfully identified and exited over one-third of downside deviation events, specifically capturing major corrections.
@@ -90,6 +93,7 @@ To prevent the model from memorizing historical noise ("looking back"), the foll
 * Stochastic Gradient Boosting: A subsample=0.7 parameter was implemented, forcing the model to train on random subsets of data for each tree. This introduces randomness that penalizes variance and improves generalization.
 
 **5. Conclusion**
+
 The algorithm successfully acts as a "Market Regime Detector." It does not attempt to predict exact daily price movements (which is stochastic) but rather identifies the underlying state of the market. This approach allows for the responsible use of 2x leverage by neutralizing the primary risk factor: prolonged exposure to bear markets.
 
 =============================================================================
