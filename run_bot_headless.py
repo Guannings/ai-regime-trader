@@ -1,5 +1,14 @@
 import matplotlib
+import os
+import sys
 
+# --- FIX: FORCE COMPUTER TO LOOK IN THE SCRIPT'S FOLDER ---
+# This gets the exact folder where this file lives
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# This tells Python: "Work inside this folder, not the user's home folder"
+os.chdir(script_dir)
+# This tells Python: "Look for other .py files (like send_email) in here too"
+sys.path.append(script_dir)
 matplotlib.use('Agg')  # Prevent window pop-ups
 import matplotlib.pyplot as plt
 import seaborn as sns
