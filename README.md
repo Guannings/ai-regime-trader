@@ -83,13 +83,11 @@ D. Overfitting Mitigation & Robustness
 
 To prevent the model from memorizing historical noise ("looking back"), the following constraints were architected into the system:
 
-* Walk-Forward Validation: Unlike standard random splitting, this project utilized Time Series Cross-Validation. The model was trained on past data and tested strictly on "future" unseen data, simulating real-world execution conditions.
+* Walk-Forward Validation: Unlike standard cross-validation which shuffles time, this project utilized **Time Series Split** validation. This simulates real-world conditions by training only on past data and testing on future data, strictly preventing look-ahead bias.
+  
+* Tree Constraints: The model is limited to shallow learners (max_depth=3) and requires a high minimum sample size per leaf (min_samples_leaf=60). This prevents the algorithm from creating hyper-specific rules based on outlier days.
 
-* Structural Constraints: The Gradient Boosting model was constrained with a shallow depth (max_depth=3) and a conservative learning rate (0.025). This forces the AI to learn broad, repeatable market concepts rather than memorizing niche price anomalies.
-
-* The "Hysteresis" Filter: To prevent "noise trading" (over-reacting to insignificant probability shifts), a deadband was implemented. The model ignores signals between 45% and 55% confidence, acting only when a decisive probability threshold is crossed.
-
-* Hard Logic Overrides: The Regime Filter (200-Day SMA) acts as a non-negotiable "Circuit Breaker." Even if the AI overfits and predicts a "Buy" during a structural crash, the hard logic forces a "Cash" position, ensuring the safety of capital takes precedence over model variance.
+* Stochastic Gradient Boosting: A subsample=0.7 parameter was implemented, forcing the model to train on random subsets of data for each tree. This introduces randomness that penalizes variance and improves generalization.
 
 **5. Conclusion**
 The algorithm successfully acts as a "Market Regime Detector." It does not attempt to predict exact daily price movements (which is stochastic) but rather identifies the underlying state of the market. This approach allows for the responsible use of 2x leverage by neutralizing the primary risk factor: prolonged exposure to bear markets.
