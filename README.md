@@ -108,5 +108,9 @@ Metric 2: Net Profitability: The backtest includes a simulated 0.001% transactio
 The algorithm successfully acts as a "Market Regime Detector." It does not attempt to predict exact daily price movements (which is stochastic) but rather identifies the underlying state of the market. This approach allows for the responsible use of 2x leverage by neutralizing the primary risk factor: prolonged exposure to bear markets.
 
 =============================================================================
-## Development Methodology 
-This project was built using an AI-Accelerated Workflow. The core financial strategy—including the Regime-Switching logic, Hysteresis filters, and Volatility Decay mitigation—was conceptualized and architected by the author. Large Language Models (Gemini) were utilized to accelerate syntax generation and boilerplate implementation, allowing the focus to remain on quantitative logic, parameter tuning, and risk management validation.
+# Development Methodology 
+**The core financial strategy—including the Regime-Switching logic, Hysteresis filters, and Volatility Decay mitigation—was conceptualized and architected by the author.** 
+
+This project was built using an AI-Accelerated Workflow. 
+
+Large Language Models (Gemini) were utilized to accelerate syntax generation and boilerplate implementation, allowing the focus to remain on quantitative logic, parameter tuning, and risk management validation.
