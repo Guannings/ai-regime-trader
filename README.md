@@ -23,64 +23,61 @@ Software Bugs: The code is provided "AS IS" without warranty of any kind. There 
 **6. LIMITATION OF LIABILITY:** IN NO EVENT SHALL THE DEVELOPERS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SYSTEM, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =======================================================================================================
-**Explanation for Dynamic Regime Detection for Leveraged ETF Allocation: An AI-Driven Approach**
+**Explanation of this project: Dynamic Regime-Switching Algorithm for Leveraged ETFs**
+
+Author: [PEHC] 
+
+Date: January 2026 
+
+Tech Stack: Python, Scikit-Learn (Gradient Boosting), Streamlit, yfinance
 
 **1. Executive Summary**
+This project implements a machine-learning-based trading strategy designed to capture the upside of leveraged equity ETFs (ProShares Ultra S&P500 - SSO) while mitigating the inherent risks of volatility decay and drawdowns during bear markets.
 
-Objective: To develop an algorithmic trading system that captures the upside of 2x leveraged ETFs (SSO) while mitigating the catastrophic drawdown risks associated with "Volatility Decay" during bear markets.
+The system utilizes a Gradient Boosting Classifier to predict short-term market regimes, reinforced by a Hard Logic Regime Filter (200-Day SMA) to override AI signals during structural market downturns. Backtesting on data from 2020–2026 demonstrates a significant risk-adjusted return advantage over a passive "Buy & Hold" strategy, specifically by minimizing max drawdowns during the 2020 and 2022 crashes.
 
-Outcome: The system utilizes a Gradient Boosting Classifier combined with a Regime Filter to outperform the S&P 500 benchmark on a risk-adjusted basis, net of transaction fees.
+**2. Investment Thesis**
+Leveraged ETFs (LETFs) like SSO (2x S&P 500) offer amplified returns but suffer from Beta Decay (Volatility Drag). In choppy or declining markets, the daily rebalancing of LETFs causes the asset value to erode faster than the underlying index.
 
-**2. The Financial Thesis (The "Why")**
+Hypothesis: A "Blind Buy & Hold" strategy on SSO is mathematically flawed due to decay.
 
-The Problem: Volatility Decay in Leveraged Products.
+Solution: A Regime-Switching Model is required to identify "Safe" (Low Vol) vs. "Dangerous" (High Vol) periods. The algorithm moves to 100% Cash (Risk-Free Rate) during dangerous regimes to preserve capital, re-entering leverage only when conditions favor momentum.
 
-Explain that daily rebalancing in leveraged ETFs (like SSO) creates a mathematical drag in volatile, flat markets. A 10% drop requires an 11.1% gain to recover, but a 2x leveraged 20% drop requires a 25% gain. This asymmetry destroys passive "Buy & Hold" strategies during downtrends.
+**3. Methodology & Architecture**
+**A. Feature Engineering**
 
-The Solution: Regime Switching.
+The model inputs technical and volatility derivatives rather than raw price, normalizing data for machine learning:
 
-The strategy posits that markets exist in two distinct regimes: "Low Volatility / Bull" (suitable for leverage) and "High Volatility / Bear" (requires cash preservation). The goal is not to predict daily prices, but to identify the current regime.
+Market Fear: VIX Index (Normalized) & Rolling Volatility (20-Day).
 
-**3. Methodology & Architecture (The "How")**
+Trend Extension: Distance from 200-Day SMA.
 
-Data Sources: Daily OHLCV data for SPY (Benchmark), VIX (Volatility Index), and SSO (Target Asset) from 2000–Present.
+Momentum: RSI (Relative Strength Index) to detect overbought/oversold conditions.
 
-Feature Engineering:
+**B. The AI Core (Gradient Boosting)**
 
-Trend: Distance from 200-day Simple Moving Average (SMA).
+A Gradient Boosting Classifier was selected over Neural Networks (LSTM/Transformers) due to its robustness with tabular data and resistance to noise.
 
-Market Fear: VIX Index normalization.
+Hyperparameters: Tuned for a "Sniper" approach (max_depth=4, learning_rate=0.05).
 
-Momentum: 14-day RSI (Relative Strength Index).
+Class Balancing: Applied sample_weight='balanced' to penalize the model heavily for missing Sell signals, countering the dataset's inherent Bullish bias.
 
-Volatility: 20-day rolling standard deviation of returns.
+**C. The "Safety Valve" (Regime Filter)**
 
-Machine Learning Model:
+To prevent "AI Hallucinations" during black swan events, a hard-coded logic layer acts as a circuit breaker:
 
-Selected Gradient Boosting Classifier (Scikit-Learn) for its ability to handle non-linear relationships between volatility and price.
+Rule 1 (Trend Filter): If SPY < 200-Day SMA, the system is forced to CASH, regardless of AI confidence.
 
-Hyperparameters: Tuned for robustness (max_depth=3, learning_rate=0.025, n_estimators=90) to prevent overfitting.
+Rule 2 (Hysteresis): To minimize transaction costs (churn), the model requires a confidence buffer (>55% to Buy, <45% to Sell). Signals in the "Gray Zone" result in holding the current position.
 
-Training Method: Implemented Sample Weighting (class_weight='balanced') to penalize the model for missing rare "Sell" signals, correcting the natural bias towards "Buy" in a long-term bull market.
+**4. Performance Validation**
+The strategy was validated using Walk-Forward Cross-Validation (Time Series Split) to prevent look-ahead bias.
 
-**4. Risk Management Rules (The "Safety Nets")**
+Metric 1: Defense (Recall on Sell Signals): Achieved a Recall of 34%. This indicates the model successfully identified and exited over one-third of downside deviation events, specifically capturing major corrections.
 
-a. The Regime Filter (The "Golden Rule"):
+Metric 2: Offense (Precision on Buy Signals): Achieved a Precision of ~66%, indicating a strong statistical edge when deploying leverage.
 
-Regardless of the AI's prediction, long positions are strictly forbidden if the S&P 500 closes below its 200-day SMA. This acts as a circuit breaker during major crashes (e.g., 2008, 2020).
+Metric 3: Net Profitability: The backtest includes a simulated 0.10% transaction cost per trade to reflect real-world slippage and commissions.
 
-b. Hysteresis (Churn Reduction):
-
-Implemented a "No-Trade Zone" (Confidence 45%–55%) to prevent excessive switching. The model only changes stance when probability signals are decisive, minimizing transaction costs and "whipsaw" losses.
-
-**5. Validation & Performance**
-
-Validation Strategy: Used Walk-Forward Cross-Validation (TimeSeriesSplit) to ensure the model was tested on "future" data it had never seen, simulating real-world deployment.
-
-Key Metrics (Test Data 2020–2026):
-
-Recall for "Sell" (0): ~34%. The system successfully identified and exited 1/3 of downturns, specifically filtering out the most damaging crash periods.
-
-Precision for "Buy" (1): ~65%. High accuracy during uptrends ensured capital efficiency.
-
-Backtest Result: The equity curve (Blue Line) demonstrates a flatter drawdown profile during 2022 compared to the passive benchmark, validating the "Capital Preservation" thesis.
+**5. Conclusion**
+The algorithm successfully acts as a "Market Regime Detector." It does not attempt to predict exact daily price movements (which is stochastic) but rather identifies the underlying state of the market. This approach allows for the responsible use of 2x leverage by neutralizing the primary risk factor: prolonged exposure to bear markets.
