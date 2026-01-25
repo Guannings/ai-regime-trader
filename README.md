@@ -58,7 +58,7 @@ Momentum: RSI (Relative Strength Index) to detect overbought/oversold conditions
 
 A Gradient Boosting Classifier was selected over Neural Networks (LSTM/Transformers) due to its robustness with tabular data and resistance to noise.
 
-Hyperparameters: Tuned for a "Sniper" approach (max_depth=4, learning_rate=0.05).
+Hyperparameters: Tuned for a "Sniper" approach (max_depth=3, learning_rate=0.025).
 
 Class Balancing: Applied sample_weight='balanced' to penalize the model heavily for missing Sell signals, countering the dataset's inherent Bullish bias.
 
