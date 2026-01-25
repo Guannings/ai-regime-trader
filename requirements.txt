@@ -1,1 +1,1 @@
-streamlityfinancepandasnumpyscikit-learnmatplotlibseaborn
+streamlityfinancepandasnumpyscikit-learnmatplotlibseabornpython-dotenv
