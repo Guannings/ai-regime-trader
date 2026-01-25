@@ -84,16 +84,6 @@ Rule 1 (Trend Filter): If SPY < 200-Day SMA, the system is forced to CASH, regar
 
 Rule 2 (Hysteresis): To minimize transaction costs (churn), the model requires a confidence buffer (>55% to Buy, <45% to Sell). Signals in the "Gray Zone" result in holding the current position.
 
-**4. Performance Validation**
-
-The strategy was validated using Walk-Forward Cross-Validation (Time Series Split) to prevent look-ahead bias.
-
-Metric 1: Defense (Recall on Sell Signals): Achieved a Recall of 34%. This indicates the model successfully identified and exited over one-third of downside deviation events, specifically capturing major corrections.
-
-Metric 2: Offense (Precision on Buy Signals): Achieved a Precision of ~66%, indicating a strong statistical edge when deploying leverage.
-
-Metric 3: Net Profitability: The backtest includes a simulated 0.10% transaction cost per trade to reflect real-world slippage and commissions.
-
 D. Overfitting Mitigation & Robustness
 
 To prevent the model from memorizing historical noise ("looking back"), the following constraints were architected into the system:
@@ -103,6 +93,15 @@ To prevent the model from memorizing historical noise ("looking back"), the foll
 * Tree Constraints: The model is limited to shallow learners (max_depth=3) and requires a high minimum sample size per leaf (min_samples_leaf=60). This prevents the algorithm from creating hyper-specific rules based on outlier days.
 
 * Stochastic Gradient Boosting: A subsample=0.7 parameter was implemented, forcing the model to train on random subsets of data for each tree. This introduces randomness that penalizes variance and improves generalization.
+
+**4. Performance Validation**
+
+The strategy was validated using Walk-Forward Cross-Validation (Time Series Split) to prevent look-ahead bias.
+
+Metric 1: Offense (Precision on Buy Signals): Achieved a Precision of ~66%, indicating a strong statistical edge when deploying leverage.
+
+Metric 2: Net Profitability: The backtest includes a simulated 0.001% transaction cost per trade to reflect real-world slippage and commissions.
+
 
 **5. Conclusion**
 
