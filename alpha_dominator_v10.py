@@ -149,7 +149,7 @@ def compute_features(prices, tlt, shy):
     # Approximated as inverse of P/E ratio minus risk-free rate
     # Using trailing returns as a rough earnings yield proxy
     trailing_return = spy.pct_change(252).shift(1)  # 1-year trailing return
-    features['ERP_Proxy'] = trailing_return - (RISK_FREE_RATE / 100)
+    features['ERP_Proxy'] = trailing_return - RISK_FREE_RATE
     
     # 6. RSI (Relative Strength Index)
     delta = spy.diff()
@@ -582,9 +582,6 @@ def run_backtest(prices, results_df, transaction_cost_bps=TRANSACTION_COST_BPS):
         # Benchmark (SPY)
         spy_ret = returns.loc[date, 'SPY'] if date in returns.index else 0.0
         benchmark_value.append(benchmark_value[-1] * (1 + spy_ret))
-    
-    # Create results DataFrame
-    dates = [initial_capital] + [r['date'] for _, r in results_df.iterrows() if r['date'] in returns.index]
     
     backtest_results = {
         'portfolio_value': portfolio_value,
