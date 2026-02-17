@@ -37,7 +37,7 @@ The code is provided "AS IS" without warranty of any kind. There may be errors, 
 =============================================================================
 # **Dynamic Regime-Switching Algorithm for Leveraged ETFs**
 
-Author: [PEHC] 
+Author: [PEHCAUXAUXAUXAUXAUXAUXAUX] 
 
 Date: January 2026 
 
