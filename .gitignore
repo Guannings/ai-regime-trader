@@ -1,1 +1,6 @@
-.env.env
+.env
+.DS_Store
+__pycache__/
+*.png
+reasoning_chart.png
+rslt
