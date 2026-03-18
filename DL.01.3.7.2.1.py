@@ -94,8 +94,8 @@ X_test = test[feature_cols]
 y_test = test['Target']
 
 MODEL_PARAMS = dict(
-    n_estimators=80, max_depth=3, learning_rate=0.02,
-    subsample=0.65, min_samples_leaf=60, random_state=42
+    n_estimators=60, max_depth=1, learning_rate=0.03,
+    subsample=0.6, min_samples_leaf=100, random_state=42
 )
 
 # --- 5. TRAIN MODEL (Expanding Window — uses all data up to 6 months ago) ---

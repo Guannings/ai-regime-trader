@@ -120,11 +120,11 @@ if __name__ == "__main__":
     print(f"🌲 Training Model on data up to {TRAIN_CUTOFF.strftime('%Y-%m-%d')} ({len(train)} rows)...")
     from sklearn.utils.class_weight import compute_sample_weight
     model = GradientBoostingClassifier(
-        n_estimators=80,
-        max_depth=3,
-        learning_rate=0.02,
-        subsample=0.65,
-        min_samples_leaf=60,
+        n_estimators=60,
+        max_depth=1,
+        learning_rate=0.03,
+        subsample=0.6,
+        min_samples_leaf=100,
         random_state=42
     )
     sample_weights = compute_sample_weight('balanced', y_train)
