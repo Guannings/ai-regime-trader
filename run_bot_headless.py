@@ -81,17 +81,22 @@ if __name__ == "__main__":
     # 2. Prepare Master DataFrame
     data = pd.DataFrame()
     data['BTC'] = btc['Close']
+    data['BTC_Volume'] = btc['Volume']
     data['VIX'] = vix['Close']
     data = data.ffill().dropna()
 
     # 3. Feature Engineering
     data['SMA_200'] = data['BTC'].rolling(200).mean()
+    data['SMA_50'] = data['BTC'].rolling(50).mean()
     data['Dist_SMA200'] = (data['BTC'] - data['SMA_200']) / data['SMA_200']
+    data['SMA_Cross'] = (data['SMA_50'] / data['SMA_200']) - 1
     data['VIX_Norm'] = data['VIX'] / 100.0
     data['Vol_20'] = data['BTC'].pct_change().rolling(20).std()
     data['RSI'] = 100 - (100 / (1 + data['BTC'].pct_change().rolling(14).apply(
         lambda x: x[x > 0].sum() / abs(x[x < 0].sum()) if abs(x[x < 0].sum()) > 0 else 1)))
-    data['BTC_Vol_Ratio'] = data['BTC'].pct_change().rolling(7).std() / data['BTC'].pct_change().rolling(30).std()
+    data['Vol_SMA20'] = data['BTC_Volume'].rolling(20).mean()
+    data['Volume_Ratio'] = data['BTC_Volume'] / data['Vol_SMA20']
+    data['Mom_20'] = data['BTC'].pct_change(20)
 
     data = data.dropna()
 
@@ -107,21 +112,23 @@ if __name__ == "__main__":
     TRAIN_CUTOFF = data.index[-1] - relativedelta(months=6)
     train = data[data.index <= TRAIN_CUTOFF]
 
-    feature_cols = ['Dist_SMA200', 'VIX_Norm', 'Vol_20', 'RSI', 'BTC_Vol_Ratio']
+    feature_cols = ['Dist_SMA200', 'SMA_Cross', 'VIX_Norm', 'Vol_20', 'RSI', 'Volume_Ratio', 'Mom_20']
     X_train = train[feature_cols]
     y_train = train['Target']
 
     # 6. Train Model (Expanding Window Retrain)
     print(f"🌲 Training Model on data up to {TRAIN_CUTOFF.strftime('%Y-%m-%d')} ({len(train)} rows)...")
+    from sklearn.utils.class_weight import compute_sample_weight
     model = GradientBoostingClassifier(
-        n_estimators=90,
+        n_estimators=80,
         max_depth=3,
-        learning_rate=0.025,
-        subsample=0.7,
-        min_samples_leaf=40,
+        learning_rate=0.02,
+        subsample=0.65,
+        min_samples_leaf=60,
         random_state=42
     )
-    model.fit(X_train, y_train)
+    sample_weights = compute_sample_weight('balanced', y_train)
+    model.fit(X_train, y_train, sample_weight=sample_weights)
 
     # 7. Generate Signal
     latest_features = data_for_prediction[feature_cols].iloc[[-1]]
@@ -136,11 +143,11 @@ if __name__ == "__main__":
     # Decision Logic (Matching App)
     signal = "NEUTRAL / HOLD"
 
-    if latest_prob > 0.55 and is_bull_regime:
+    if latest_prob > 0.52 and is_bull_regime:
         signal = "BUY / LONG BTC"
     elif latest_prob < 0.45:
         signal = "SELL / CASH"
-    elif not is_bull_regime and latest_prob > 0.55:
+    elif not is_bull_regime and latest_prob > 0.52:
         signal = "BLOCKED (Bear Regime)"
     else:
         signal = "NEUTRAL (Hysteresis)"

@@ -55,17 +55,22 @@ btc, vix = load_data_safe()
 # Prepare Master DataFrame
 data = pd.DataFrame()
 data['BTC'] = btc['Close']
+data['BTC_Volume'] = btc['Volume']
 data['VIX'] = vix['Close']
 data = data.ffill().dropna()
 
 # --- 2. FEATURE ENGINEERING ---
 data['SMA_200'] = data['BTC'].rolling(200).mean()
+data['SMA_50'] = data['BTC'].rolling(50).mean()
 data['Dist_SMA200'] = (data['BTC'] - data['SMA_200']) / data['SMA_200']
+data['SMA_Cross'] = (data['SMA_50'] / data['SMA_200']) - 1
 data['VIX_Norm'] = data['VIX'] / 100.0
 data['Vol_20'] = data['BTC'].pct_change().rolling(20).std()
 data['RSI'] = 100 - (100 / (1 + data['BTC'].pct_change().rolling(14).apply(
     lambda x: x[x > 0].sum() / abs(x[x < 0].sum()) if abs(x[x < 0].sum()) > 0 else 1)))
-data['BTC_Vol_Ratio'] = data['BTC'].pct_change().rolling(7).std() / data['BTC'].pct_change().rolling(30).std()
+data['Vol_SMA20'] = data['BTC_Volume'].rolling(20).mean()
+data['Volume_Ratio'] = data['BTC_Volume'] / data['Vol_SMA20']
+data['Mom_20'] = data['BTC'].pct_change(20)
 
 data = data.dropna()
 
@@ -82,20 +87,21 @@ TRAIN_CUTOFF = data.index[-1] - relativedelta(months=6)
 train = data[data.index <= TRAIN_CUTOFF]
 test = data[data.index >= TEST_START_DATE]
 
-feature_cols = ['Dist_SMA200', 'VIX_Norm', 'Vol_20', 'RSI', 'BTC_Vol_Ratio']
+feature_cols = ['Dist_SMA200', 'SMA_Cross', 'VIX_Norm', 'Vol_20', 'RSI', 'Volume_Ratio', 'Mom_20']
 X_train = train[feature_cols]
 y_train = train['Target']
 X_test = test[feature_cols]
 y_test = test['Target']
 
 MODEL_PARAMS = dict(
-    n_estimators=90, max_depth=3, learning_rate=0.025,
-    subsample=0.7, min_samples_leaf=40, random_state=42
+    n_estimators=80, max_depth=3, learning_rate=0.02,
+    subsample=0.65, min_samples_leaf=60, random_state=42
 )
 
 # --- 5. TRAIN MODEL (Expanding Window — uses all data up to 6 months ago) ---
 model = GradientBoostingClassifier(**MODEL_PARAMS)
-model.fit(X_train, y_train)
+sample_weights = compute_sample_weight('balanced', y_train)
+model.fit(X_train, y_train, sample_weight=sample_weights)
 
 # --- 6. GENERATE TODAY'S SIGNAL (FIX #1 & #2 APPLIED) ---
 latest_features = data_for_prediction[feature_cols].iloc[[-1]]
@@ -113,7 +119,7 @@ signal = "NEUTRAL / HOLD"
 color_code = "gray"
 exposure = "Unchanged"
 
-if latest_prob > 0.55 and is_bull_regime:
+if latest_prob > 0.52 and is_bull_regime:
     signal = "BUY / LONG BTC"
     color_code = "green"
     exposure = "100% (1x BTC)"
@@ -121,7 +127,7 @@ elif latest_prob < 0.45:
     signal = "SELL / CASH"
     color_code = "red"
     exposure = "0% (Cash Yield)"
-elif not is_bull_regime and latest_prob > 0.55:
+elif not is_bull_regime and latest_prob > 0.52:
     signal = "BLOCKED (Bear Regime)"
     color_code = "orange"
     exposure = "0% (Safety First)"
@@ -154,7 +160,7 @@ st.divider()
 
 # --- BACKTEST CHART (FIX #1 & #2 APPLIED) ---
 st.subheader("📊 Performance Verification (BTC)")
-st.caption("Includes: 0.1% Transaction Costs | Hysteresis Filter (45-55%) | 200-SMA Regime Filter")
+st.caption("Includes: 0.1% Transaction Costs | Hysteresis Filter (45-52%) | 200-SMA Regime Filter | Class-Balanced Training")
 
 with st.spinner("Running Realistic Simulation (with periodic retraining)..."):
     ret_btc = test['BTC'].pct_change().fillna(0).values
@@ -179,7 +185,8 @@ with st.spinner("Running Realistic Simulation (with periodic retraining)..."):
             bt_train = data[data.index <= train_cutoff]
             if len(bt_train) >= 200:
                 bt_model = GradientBoostingClassifier(**MODEL_PARAMS)
-                bt_model.fit(bt_train[feature_cols], bt_train['Target'])
+                bt_sw = compute_sample_weight('balanced', bt_train['Target'])
+                bt_model.fit(bt_train[feature_cols], bt_train['Target'], sample_weight=bt_sw)
 
         if bt_model is not None:
             probs[i] = bt_model.predict_proba(test[feature_cols].iloc[[i]])[0][1]
@@ -196,7 +203,7 @@ with st.spinner("Running Realistic Simulation (with periodic retraining)..."):
         if not is_bull_regime:
             target_holding = 0  # <--- FORCE EXIT (Flattens the line in Bear Markets)
 
-        elif prob > 0.55:  # Only Buy if Regime is Bull AND AI is Confident
+        elif prob > 0.52:  # Only Buy if Regime is Bull AND AI is Confident
             target_holding = 1
 
         elif prob < 0.45:  # Sell if AI gets scared
@@ -259,7 +266,8 @@ for tr_index, val_index in tscv.split(X_train):
     X_tr, X_val = X_train.iloc[tr_index], X_train.iloc[val_index]
     y_tr, y_val = y_train.iloc[tr_index], y_train.iloc[val_index]
     val_model = GradientBoostingClassifier(**MODEL_PARAMS)
-    val_model.fit(X_tr, y_tr)
+    val_sw = compute_sample_weight('balanced', y_tr)
+    val_model.fit(X_tr, y_tr, sample_weight=val_sw)
     cv_scores.append(val_model.score(X_val, y_val))
 
 avg_cv_score = np.mean(cv_scores)
