@@ -91,6 +91,7 @@ if __name__ == "__main__":
     data['Dist_SMA200'] = (data['BTC'] - data['SMA_200']) / data['SMA_200']
     data['SMA_Cross'] = (data['SMA_50'] / data['SMA_200']) - 1
     data['VIX_Norm'] = data['VIX'] / 100.0
+    data['VIX_Change'] = data['VIX'].pct_change(5)
     data['Vol_20'] = data['BTC'].pct_change().rolling(20).std()
     data['RSI'] = 100 - (100 / (1 + data['BTC'].pct_change().rolling(14).apply(
         lambda x: x[x > 0].sum() / abs(x[x < 0].sum()) if abs(x[x < 0].sum()) > 0 else 1)))
@@ -112,7 +113,7 @@ if __name__ == "__main__":
     TRAIN_CUTOFF = data.index[-1] - relativedelta(months=6)
     train = data[data.index <= TRAIN_CUTOFF]
 
-    feature_cols = ['Dist_SMA200', 'SMA_Cross', 'VIX_Norm', 'Vol_20', 'RSI', 'Volume_Ratio', 'Mom_20']
+    feature_cols = ['Dist_SMA200', 'SMA_Cross', 'VIX_Norm', 'VIX_Change', 'Vol_20', 'RSI', 'Volume_Ratio', 'Mom_20']
     X_train = train[feature_cols]
     y_train = train['Target']
 
@@ -123,8 +124,8 @@ if __name__ == "__main__":
         n_estimators=60,
         max_depth=1,
         learning_rate=0.03,
-        subsample=0.6,
-        min_samples_leaf=100,
+        subsample=0.5,
+        min_samples_leaf=120,
         random_state=42
     )
     sample_weights = compute_sample_weight('balanced', y_train)
@@ -143,11 +144,11 @@ if __name__ == "__main__":
     # Decision Logic (Matching App)
     signal = "NEUTRAL / HOLD"
 
-    if latest_prob > 0.52 and is_bull_regime:
+    if latest_prob > 0.51 and is_bull_regime:
         signal = "BUY / LONG BTC"
-    elif latest_prob < 0.45:
+    elif latest_prob < 0.46:
         signal = "SELL / CASH"
-    elif not is_bull_regime and latest_prob > 0.52:
+    elif not is_bull_regime and latest_prob > 0.51:
         signal = "BLOCKED (Bear Regime)"
     else:
         signal = "NEUTRAL (Hysteresis)"

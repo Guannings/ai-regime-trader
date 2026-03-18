@@ -65,6 +65,7 @@ data['SMA_50'] = data['BTC'].rolling(50).mean()
 data['Dist_SMA200'] = (data['BTC'] - data['SMA_200']) / data['SMA_200']
 data['SMA_Cross'] = (data['SMA_50'] / data['SMA_200']) - 1
 data['VIX_Norm'] = data['VIX'] / 100.0
+data['VIX_Change'] = data['VIX'].pct_change(5)
 data['Vol_20'] = data['BTC'].pct_change().rolling(20).std()
 data['RSI'] = 100 - (100 / (1 + data['BTC'].pct_change().rolling(14).apply(
     lambda x: x[x > 0].sum() / abs(x[x < 0].sum()) if abs(x[x < 0].sum()) > 0 else 1)))
@@ -87,7 +88,7 @@ TRAIN_CUTOFF = data.index[-1] - relativedelta(months=6)
 train = data[data.index <= TRAIN_CUTOFF]
 test = data[data.index >= TEST_START_DATE]
 
-feature_cols = ['Dist_SMA200', 'SMA_Cross', 'VIX_Norm', 'Vol_20', 'RSI', 'Volume_Ratio', 'Mom_20']
+feature_cols = ['Dist_SMA200', 'SMA_Cross', 'VIX_Norm', 'VIX_Change', 'Vol_20', 'RSI', 'Volume_Ratio', 'Mom_20']
 X_train = train[feature_cols]
 y_train = train['Target']
 X_test = test[feature_cols]
@@ -95,7 +96,7 @@ y_test = test['Target']
 
 MODEL_PARAMS = dict(
     n_estimators=60, max_depth=1, learning_rate=0.03,
-    subsample=0.6, min_samples_leaf=100, random_state=42
+    subsample=0.5, min_samples_leaf=120, random_state=42
 )
 
 # --- 5. TRAIN MODEL (Expanding Window — uses all data up to 6 months ago) ---
@@ -119,15 +120,15 @@ signal = "NEUTRAL / HOLD"
 color_code = "gray"
 exposure = "Unchanged"
 
-if latest_prob > 0.52 and is_bull_regime:
+if latest_prob > 0.51 and is_bull_regime:
     signal = "BUY / LONG BTC"
     color_code = "green"
     exposure = "100% (1x BTC)"
-elif latest_prob < 0.45:
+elif latest_prob < 0.46:
     signal = "SELL / CASH"
     color_code = "red"
     exposure = "0% (Cash Yield)"
-elif not is_bull_regime and latest_prob > 0.52:
+elif not is_bull_regime and latest_prob > 0.51:
     signal = "BLOCKED (Bear Regime)"
     color_code = "orange"
     exposure = "0% (Safety First)"
@@ -160,7 +161,7 @@ st.divider()
 
 # --- BACKTEST CHART (FIX #1 & #2 APPLIED) ---
 st.subheader("📊 Performance Verification (BTC)")
-st.caption("Includes: 0.1% Transaction Costs | Hysteresis Filter (45-52%) | 200-SMA Regime Filter | Class-Balanced Training")
+st.caption("Includes: 0.1% Transaction Costs | Hysteresis Filter (46-51%) | 200-SMA Regime Filter | Class-Balanced Training | 60-Day Retrain")
 
 with st.spinner("Running Realistic Simulation (with periodic retraining)..."):
     ret_btc = test['BTC'].pct_change().fillna(0).values
@@ -174,7 +175,7 @@ with st.spinner("Running Realistic Simulation (with periodic retraining)..."):
     signals = []
 
     current_holding = 0  # 0 = Cash, 1 = BTC
-    RETRAIN_INTERVAL = 90  # Retrain every 90 days
+    RETRAIN_INTERVAL = 60  # Retrain every 60 days
     bt_model = None
     probs = np.zeros(len(dates))
 
@@ -203,10 +204,10 @@ with st.spinner("Running Realistic Simulation (with periodic retraining)..."):
         if not is_bull_regime:
             target_holding = 0  # <--- FORCE EXIT (Flattens the line in Bear Markets)
 
-        elif prob > 0.52:  # Only Buy if Regime is Bull AND AI is Confident
+        elif prob > 0.51:  # Only Buy if Regime is Bull AND AI is Confident
             target_holding = 1
 
-        elif prob < 0.45:  # Sell if AI gets scared
+        elif prob < 0.46:  # Sell if AI gets scared
             target_holding = 0
 
         else:
