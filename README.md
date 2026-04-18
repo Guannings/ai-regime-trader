@@ -41,7 +41,7 @@ The code is provided "AS IS" without warranty of any kind. There may be errors, 
 =============================================================================
 # **Dynamic Regime-Switching Algorithm for Bitcoin (BTC)**
 
-Author: [PEHC]
+Author: [PARVAUX]
 
 Date: March 2026
 
